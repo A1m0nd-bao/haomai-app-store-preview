@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>好麦 AI - App Store 预览</title>
+    <link rel="stylesheet" href="./app-store-preview.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="store-wordmark">App Store</div>
+        <nav aria-label="页面导航">
+          <a href="#screenshots">预览</a>
+          <a href="#details">详情</a>
+          <a href="#info">信息</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="app-hero" aria-label="App 信息">
+        <img class="app-icon" src="./assets/haomai-logo-black.png" alt="好麦 AI 图标" />
+        <div class="app-meta">
+          <h1>好麦 AI</h1>
+          <p class="subtitle">把繁琐的数字世界折叠成你的一句指令</p>
+          <p class="developer">好麦科技</p>
+          <div class="actions">
+            <button type="button">获取</button>
+            <span>App 内购买</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="stats" aria-label="App Store 信息">
+        <article>
+          <span class="stat-label">评分</span>
+          <strong>4.9</strong>
+          <span class="stars">★★★★★</span>
+        </article>
+        <article>
+          <span class="stat-label">年龄</span>
+          <strong>4+</strong>
+          <span>岁以上</span>
+        </article>
+        <article>
+          <span class="stat-label">类别</span>
+          <strong>效率</strong>
+          <span>工具</span>
+        </article>
+        <article>
+          <span class="stat-label">开发者</span>
+          <strong>好麦</strong>
+          <span>AI 自动执行</span>
+        </article>
+      </section>
+
+      <section class="preview-stage" id="screenshots" aria-label="App Store 截图预览">
+        <div class="section-heading">
+          <div>
+            <h2>预览</h2>
+          </div>
+          <div class="segmented" role="tablist" aria-label="设备尺寸">
+            <button class="active" type="button">iPhone</button>
+          </div>
+        </div>
+
+        <div class="screenshot-rail" id="screenshotRail" tabindex="0" aria-label="横向截图列表"></div>
+      </section>
+
+      <section class="description" id="details">
+        <div>
+          <h2>简介</h2>
+          <p>
+            好麦 AI 是你的专属数字员工。无需复杂操作，只要输入任务指令，
+            AI 即可规划执行路径，在手机中跨 App 自动执行重复性工作，并在结束后给出反馈与总结。
+          </p>
+        </div>
+        <div class="whats-new">
+          <h2>适合场景</h2>
+          <ul>
+            <li>精准找客、评论转化、口碑维护。</li>
+            <li>竞品监控、比价、信息整理与总结。</li>
+            <li>人脉激活、回访、线上触达与运营执行。</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="app-info" id="info" aria-label="App 信息">
+        <h2>信息</h2>
+        <dl>
+          <div>
+            <dt>供应商</dt>
+            <dd>好麦科技</dd>
+          </div>
+          <div>
+            <dt>类别</dt>
+            <dd>效率</dd>
+          </div>
+          <div>
+            <dt>兼容性</dt>
+            <dd>iPhone</dd>
+          </div>
+          <div>
+            <dt>语言</dt>
+            <dd>简体中文</dd>
+          </div>
+          <div>
+            <dt>年龄分级</dt>
+            <dd>4+</dd>
+          </div>
+        </dl>
+      </section>
+    </main>
+
+    <div class="lightbox" id="lightbox" aria-hidden="true">
+      <button class="close" type="button" aria-label="关闭预览">×</button>
+      <img alt="" />
+      <p></p>
+    </div>
+
+    <script src="./app-store-preview.js"></script>
+  </body>
+</html>
