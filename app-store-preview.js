@@ -37,9 +37,34 @@ const styles = [
     label: "石墨极简",
     base: "./AppStore多风格输出/05-石墨极简质感风",
   },
+  {
+    id: "bubble-glass",
+    label: "气泡增强｜深色玻璃",
+    base: "./AppStore气泡弹窗增强输出/01-深色玻璃光幕",
+  },
+  {
+    id: "bubble-white-card",
+    label: "气泡增强｜白色卡片",
+    base: "./AppStore气泡弹窗增强输出/02-白色大卡片清爽风",
+  },
+  {
+    id: "bubble-black-title",
+    label: "气泡增强｜黑底标题",
+    base: "./AppStore气泡弹窗增强输出/03-黑底大标题首版风",
+  },
+  {
+    id: "bubble-blue-white",
+    label: "气泡增强｜蓝白清透",
+    base: "./AppStore气泡弹窗增强输出/04-蓝白清透风",
+  },
+  {
+    id: "bubble-graphite",
+    label: "气泡增强｜石墨极简",
+    base: "./AppStore气泡弹窗增强输出/05-石墨极简质感风",
+  },
 ];
 
-const assetVersion = "adaptive-statusbar-20260428-1608";
+const assetVersion = "overflow-bubble-20260506-1";
 
 const rail = document.querySelector("#screenshotRail");
 const tabs = document.querySelector("#styleTabs");
