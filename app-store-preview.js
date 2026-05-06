@@ -64,7 +64,7 @@ const styles = [
   },
 ];
 
-const assetVersion = "overflow-bubble-20260506-1";
+const assetVersion = "overflow-bubble-20260506-2";
 
 const rail = document.querySelector("#screenshotRail");
 const tabs = document.querySelector("#styleTabs");
