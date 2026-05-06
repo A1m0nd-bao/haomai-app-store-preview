@@ -11,6 +11,25 @@ const screenshotOrder = [
   "07-我的界面1.png",
 ];
 
+const bubbleScreenshotOrder = [
+  "01-任务总结页.png",
+  "03-任务详情页-提示词详情和历史执行记录.png",
+  "04-任务部署后思考.png",
+  "06-我的任务页-任务历史.png",
+  "07-我的界面1.png",
+  "10-搜索页.png",
+  "12-添加任务.png",
+  "16-自定义任务.png",
+  "02-任务模版页.png",
+  "05-总结.png",
+  "08-我的界面2.png",
+  "09-我的界面3.png",
+  "11-搜索页2.png",
+  "13-用户指引1.png",
+  "14-用户指引2.png",
+  "15-用户指引3.png",
+];
+
 const styles = [
   {
     id: "glass",
@@ -64,7 +83,7 @@ const styles = [
   },
 ];
 
-const assetVersion = "overflow-bubble-20260506-5";
+const assetVersion = "overflow-bubble-20260506-6";
 
 const rail = document.querySelector("#screenshotRail");
 const tabs = document.querySelector("#styleTabs");
@@ -81,6 +100,10 @@ function labelFromName(name) {
 
 function imagePath(style, name) {
   return `${style.base}/${name}?v=${assetVersion}`;
+}
+
+function orderForStyle(style) {
+  return style.id.startsWith("bubble-") ? bubbleScreenshotOrder : screenshotOrder;
 }
 
 function createCard(style, name) {
@@ -128,7 +151,7 @@ function renderTabs() {
 
 function renderRail() {
   rail.replaceChildren();
-  screenshotOrder.forEach((name) => {
+  orderForStyle(currentStyle).forEach((name) => {
     rail.appendChild(createCard(currentStyle, name));
   });
   rail.scrollLeft = 0;
