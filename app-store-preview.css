@@ -330,10 +330,31 @@ h2 {
 
 .style-tabs {
   display: flex;
-  gap: 8px;
+  gap: 14px;
   overflow-x: auto;
   padding: 2px 0 18px;
   scrollbar-width: thin;
+}
+
+.style-tab-group {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+  padding-right: 14px;
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.style-tab-group:last-child {
+  border-right: 0;
+  padding-right: 0;
+}
+
+.style-tab-category {
+  flex: 0 0 auto;
+  color: #6e6e73;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .style-tabs button {

@@ -1,7 +1,8 @@
 {
-  "version": "seed-20260622",
+  "version": "2026-06-22T07:28:45.948Z",
   "styles": [
     {
+      "category": "气泡增强",
       "productId": "haomai",
       "id": "bubble-glass",
       "label": "气泡增强｜深色玻璃",
@@ -89,6 +90,7 @@
       ]
     },
     {
+      "category": "气泡增强",
       "productId": "haomai",
       "id": "bubble-white-card",
       "label": "气泡增强｜白色卡片",
@@ -176,6 +178,7 @@
       ]
     },
     {
+      "category": "气泡增强",
       "productId": "haomai",
       "id": "bubble-black-title",
       "label": "气泡增强｜黑底标题",
@@ -263,6 +266,7 @@
       ]
     },
     {
+      "category": "气泡增强",
       "productId": "haomai",
       "id": "bubble-blue-white",
       "label": "气泡增强｜蓝白清透",
@@ -350,6 +354,7 @@
       ]
     },
     {
+      "category": "气泡增强",
       "productId": "haomai",
       "id": "bubble-graphite",
       "label": "气泡增强｜石墨极简",
@@ -437,6 +442,7 @@
       ]
     },
     {
+      "category": "基础多风格",
       "productId": "haomai",
       "id": "glass",
       "label": "深色玻璃光幕",
@@ -494,6 +500,7 @@
       ]
     },
     {
+      "category": "基础多风格",
       "productId": "haomai",
       "id": "white-card",
       "label": "白色大卡片",
@@ -551,6 +558,7 @@
       ]
     },
     {
+      "category": "基础多风格",
       "productId": "haomai",
       "id": "black-title",
       "label": "黑底大标题",
@@ -608,6 +616,7 @@
       ]
     },
     {
+      "category": "基础多风格",
       "productId": "haomai",
       "id": "blue-white",
       "label": "蓝白清透",
@@ -665,6 +674,7 @@
       ]
     },
     {
+      "category": "基础多风格",
       "productId": "haomai",
       "id": "graphite",
       "label": "石墨极简",
@@ -720,6 +730,76 @@
           "order": 10
         }
       ]
+    },
+    {
+      "category": "AR 核心体验",
+      "productId": "topia",
+      "id": "camera-ar",
+      "label": "AR 互动面",
+      "screenshots": []
+    },
+    {
+      "category": "身份与角色",
+      "productId": "topia",
+      "id": "character",
+      "label": "Loci Character",
+      "screenshots": []
+    },
+    {
+      "category": "身份与角色",
+      "productId": "topia",
+      "id": "profile",
+      "label": "Profile",
+      "screenshots": []
+    },
+    {
+      "category": "地点与足迹",
+      "productId": "topia",
+      "id": "footprint",
+      "label": "AR Footprint",
+      "screenshots": []
+    },
+    {
+      "category": "地点与足迹",
+      "productId": "topia",
+      "id": "moment",
+      "label": "Topia Moment",
+      "screenshots": []
+    },
+    {
+      "category": "互动与回应",
+      "productId": "topia",
+      "id": "interactions",
+      "label": "Interactions",
+      "screenshots": []
+    },
+    {
+      "category": "创作引导",
+      "productId": "topia",
+      "id": "create-character",
+      "label": "Create Character",
+      "screenshots": []
+    },
+    {
+      "category": "创作引导",
+      "productId": "topia",
+      "id": "place-moment",
+      "label": "Place Moment",
+      "screenshots": []
+    },
+    {
+      "category": "身份与角色",
+      "productId": "topia",
+      "id": "nfc-card",
+      "label": "AR Social Card",
+      "screenshots": []
+    },
+    {
+      "category": "地点与足迹",
+      "productId": "topia",
+      "id": "discovery",
+      "label": "Ambient Discovery",
+      "screenshots": []
     }
   ]
 }

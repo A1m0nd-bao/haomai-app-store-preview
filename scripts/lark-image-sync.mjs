@@ -30,6 +30,7 @@ async function syncOnce(config, options = {}) {
   const state = await loadState(config.stateFile);
   const sheetResults = await readSheets(config);
   const entries = sheetResults.flatMap(({ rows, sheet }) => parseRows(rows, config, sheet));
+  const styleMetadata = sheetResults.flatMap(({ rows, sheet }) => parseStyleMetadata(rows, config, sheet));
   const activeIds = new Set(entries.map((entry) => entry.sourceId).filter(Boolean));
   let changed = false;
 
@@ -78,11 +79,17 @@ async function syncOnce(config, options = {}) {
 
   if (changed) {
     await saveState(config.stateFile, state);
-    await writeDataFile(config, state);
-    if (options.publish) await publishChanges(config);
+    const dataChanged = await writeDataFile(config, state, styleMetadata);
+    if (options.publish && dataChanged) await publishChanges(config);
   } else {
-    console.log("[lark-image-sync] No image changes.");
-    if (options.publish) await pushPendingCommits();
+    const dataChanged = await writeDataFile(config, state, styleMetadata);
+    if (dataChanged) {
+      console.log("[lark-image-sync] Updated screenshot metadata.");
+      if (options.publish) await publishChanges(config);
+    } else {
+      console.log("[lark-image-sync] No image changes.");
+      if (options.publish) await pushPendingCommits();
+    }
   }
 }
 
@@ -101,7 +108,7 @@ function hasStateChanged(current, next) {
   );
 }
 
-async function writeDataFile(config, state) {
+async function writeDataFile(config, state, styleMetadata = []) {
   const groups = new Map();
   const baseData = await loadBaseData(config.baseDataFile);
 
@@ -109,11 +116,34 @@ async function writeDataFile(config, state) {
     if (!style.id || !style.label || !Array.isArray(style.screenshots)) continue;
     const key = `${style.productId || "haomai"}:${style.id}`;
     groups.set(key, {
+      category: style.category || "",
       productId: style.productId || "haomai",
       id: style.id,
       label: style.label,
       screenshots: style.screenshots.map((item) => ({ ...item })),
     });
+  }
+
+  for (const style of styleMetadata) {
+    const key = `${style.productId || "haomai"}:${style.id}`;
+    if (!groups.has(key)) {
+      groups.set(key, {
+        category: style.category || "",
+        productId: style.productId || "haomai",
+        id: style.id,
+        label: style.label,
+        screenshots: [],
+      });
+    }
+
+    const group = groups.get(key);
+    group.category = style.category || group.category || "";
+    group.label = style.label || group.label;
+
+    for (const screenshot of style.screenshots || []) {
+      const existing = group.screenshots.find((item) => Number(item.order || 0) === Number(screenshot.order || 0));
+      if (existing && screenshot.title) existing.title = screenshot.title;
+    }
   }
 
   for (const item of Object.values(state.synced)) {
@@ -149,8 +179,31 @@ async function writeDataFile(config, state) {
     })),
   };
 
+  const output = `${JSON.stringify(data, null, 2)}\n`;
+  const current = await readExistingData(config.dataFile);
+  if (current && normalizeDataForCompare(current) === normalizeDataForCompare(output)) return false;
+
   await mkdir(dirname(join(root, config.dataFile)), { recursive: true });
-  await writeFile(join(root, config.dataFile), `${JSON.stringify(data, null, 2)}\n`);
+  await writeFile(join(root, config.dataFile), output);
+  return true;
+}
+
+async function readExistingData(file) {
+  try {
+    return await readFile(join(root, file), "utf8");
+  } catch {
+    return "";
+  }
+}
+
+function normalizeDataForCompare(raw) {
+  try {
+    const data = JSON.parse(raw);
+    delete data.version;
+    return JSON.stringify(data);
+  } catch {
+    return raw;
+  }
 }
 
 async function loadBaseData(file) {
@@ -372,19 +425,27 @@ function parseRows(rows, config, sheet = {}) {
 
   if (columns.image < 0) throw new Error(`Cannot find image column "${config.columns.image}".`);
 
+  let inheritedCategory = "";
+  let inheritedStyleId = "";
+  let inheritedStyleLabel = "";
+
   return rows.slice(headerIndex + 1).flatMap((row, index) => {
     const rowNumber = headerIndex + index + 2;
     const enabled = readCell(row, columns.enabled) || "是";
     if (["否", "no", "false", "0"].includes(enabled.toLowerCase())) return [];
 
-    const styleId = readCell(row, columns.styleId);
-    const styleLabel = readCell(row, columns.styleLabel);
+    inheritedCategory = readCell(row, columns.category) || inheritedCategory;
+    inheritedStyleId = readCell(row, columns.styleId) || inheritedStyleId;
+    inheritedStyleLabel = readCell(row, columns.styleLabel) || inheritedStyleLabel;
+
+    const styleId = inheritedStyleId;
+    const styleLabel = inheritedStyleLabel;
     if (!styleId || !styleLabel) return [];
 
     return extractFileRefs(row[columns.image]).map((fileRef, refIndex) => ({
       rowNumber,
       sheetId: sheet.sheetId,
-      category: readCell(row, columns.category),
+      category: inheritedCategory,
       productId: readCell(row, columns.productId) || sheet.defaultProductId || config.defaultProductId,
       productName: readCell(row, columns.productName) || sheet.defaultProductName || config.defaultProductName,
       styleId,
@@ -396,6 +457,58 @@ function parseRows(rows, config, sheet = {}) {
       fileName: fileRef.name || `row-${rowNumber}-${refIndex + 1}.png`,
     }));
   });
+}
+
+function parseStyleMetadata(rows, config, sheet = {}) {
+  const headerIndex = Math.max(0, Number(sheet.headerRow || config.headerRow || 1) - 1);
+  const headers = (rows[headerIndex] || []).map((cell) => normalizeCellText(cell));
+  const columns = {
+    category: findColumn(headers, config.columns.category),
+    styleId: findColumn(headers, config.columns.styleId),
+    styleLabel: findColumn(headers, config.columns.styleLabel),
+    productId: findColumn(headers, config.columns.productId),
+    productName: findColumn(headers, config.columns.productName),
+    order: findColumn(headers, config.columns.order),
+    title: findColumn(headers, config.columns.title),
+    enabled: findColumn(headers, config.columns.enabled),
+  };
+  const styles = new Map();
+  let inheritedCategory = "";
+  let inheritedStyleId = "";
+  let inheritedStyleLabel = "";
+
+  for (const row of rows.slice(headerIndex + 1)) {
+    const enabled = readCell(row, columns.enabled) || "是";
+    if (["否", "no", "false", "0"].includes(enabled.toLowerCase())) continue;
+
+    inheritedCategory = readCell(row, columns.category) || inheritedCategory;
+    inheritedStyleId = readCell(row, columns.styleId) || inheritedStyleId;
+    inheritedStyleLabel = readCell(row, columns.styleLabel) || inheritedStyleLabel;
+
+    if (!inheritedStyleId || !inheritedStyleLabel) continue;
+
+    const productId = readCell(row, columns.productId) || sheet.defaultProductId || config.defaultProductId;
+    const productName = readCell(row, columns.productName) || sheet.defaultProductName || config.defaultProductName;
+    const key = `${productId}:${inheritedStyleId}`;
+    if (!styles.has(key)) {
+      styles.set(key, {
+        category: inheritedCategory,
+        productId,
+        productName,
+        id: inheritedStyleId,
+        label: inheritedStyleLabel,
+        screenshots: [],
+      });
+    }
+
+    const order = Number(readCell(row, columns.order) || 0);
+    const title = readCell(row, columns.title);
+    if (order > 0 || title) {
+      styles.get(key).screenshots.push({ order, title });
+    }
+  }
+
+  return [...styles.values()];
 }
 
 function findColumn(headers, label) {

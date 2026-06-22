@@ -313,6 +313,7 @@ function stylesForProduct(productId) {
     .map((style) => ({
       id: style.id,
       label: style.label,
+      category: style.category || "其他风格",
       screenshots: Array.isArray(style.screenshots)
         ? style.screenshots
             .filter((item) => item?.src)
@@ -357,22 +358,41 @@ function renderTabs(productStyles) {
   const tabs = document.querySelector("#styleTabs");
   if (!tabs) return;
   tabs.replaceChildren();
-  productStyles.forEach((style) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.role = "tab";
-    button.id = `style-tab-${style.id}`;
-    button.textContent = style.label;
-    button.setAttribute("aria-controls", "screenshotRail");
-    button.setAttribute("aria-selected", style.id === currentStyle?.id ? "true" : "false");
-    button.addEventListener("click", () => {
-      currentStyle = style;
-      tabs.querySelectorAll("button").forEach((item) => {
-        item.setAttribute("aria-selected", item.id === `style-tab-${style.id}` ? "true" : "false");
+  const groupedStyles = productStyles.reduce((groups, style) => {
+    const category = style.category || "其他风格";
+    if (!groups.has(category)) groups.set(category, []);
+    groups.get(category).push(style);
+    return groups;
+  }, new Map());
+
+  groupedStyles.forEach((styles, category) => {
+    const group = document.createElement("div");
+    group.className = "style-tab-group";
+
+    const label = document.createElement("span");
+    label.className = "style-tab-category";
+    label.textContent = category;
+    group.appendChild(label);
+
+    styles.forEach((style) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.role = "tab";
+      button.id = `style-tab-${style.id}`;
+      button.textContent = style.label;
+      button.setAttribute("aria-controls", "screenshotRail");
+      button.setAttribute("aria-selected", style.id === currentStyle?.id ? "true" : "false");
+      button.addEventListener("click", () => {
+        currentStyle = style;
+        tabs.querySelectorAll("button").forEach((item) => {
+          item.setAttribute("aria-selected", item.id === `style-tab-${style.id}` ? "true" : "false");
+        });
+        renderRail(productStyles);
       });
-      renderRail(productStyles);
+      group.appendChild(button);
     });
-    tabs.appendChild(button);
+
+    tabs.appendChild(group);
   });
 }
 
