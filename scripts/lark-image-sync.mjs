@@ -28,8 +28,8 @@ async function main() {
 
 async function syncOnce(config, options = {}) {
   const state = await loadState(config.stateFile);
-  const rows = await readSheet(config);
-  const entries = parseRows(rows, config);
+  const sheetResults = await readSheets(config);
+  const entries = sheetResults.flatMap(({ rows, sheet }) => parseRows(rows, config, sheet));
   const activeIds = new Set(entries.map((entry) => entry.sourceId).filter(Boolean));
   let changed = false;
 
@@ -39,7 +39,7 @@ async function syncOnce(config, options = {}) {
 
     if (!existing) {
       const fileName = buildFileName(entry);
-      const outputPath = join(root, config.outputDir, slugify(entry.styleId), fileName);
+      const outputPath = join(root, config.outputDir, slugify(entry.productId), slugify(entry.styleId), fileName);
       await downloadImage(entry.token, outputPath, config.identity);
       output = relativePath(outputPath);
       console.log(`[lark-image-sync] Synced ${output}`);
@@ -48,6 +48,7 @@ async function syncOnce(config, options = {}) {
     const nextState = {
       output,
       token: entry.token,
+      category: entry.category,
       productId: entry.productId,
       productName: entry.productName,
       styleId: entry.styleId,
@@ -89,6 +90,7 @@ function hasStateChanged(current, next) {
   return (
     current.output !== next.output ||
     current.token !== next.token ||
+    current.category !== next.category ||
     current.productId !== next.productId ||
     current.productName !== next.productName ||
     current.styleId !== next.styleId ||
@@ -119,6 +121,7 @@ async function writeDataFile(config, state) {
     const key = `${item.productId || "haomai"}:${item.styleId}`;
     if (!groups.has(key)) {
       groups.set(key, {
+        category: item.category || "",
         productId: item.productId || "haomai",
         id: item.styleId,
         label: item.styleLabel,
@@ -282,8 +285,6 @@ async function loadConfig() {
 
   const config = JSON.parse(raw);
   if (!config.spreadsheetToken) throw new Error("Config needs spreadsheetToken.");
-  if (!config.sheetId) throw new Error("Config needs sheetId.");
-  if (!config.range) config.range = "A1:G200";
   if (!config.headerRow) config.headerRow = 1;
   if (!config.identity) config.identity = "user";
   if (!config.pollSeconds) config.pollSeconds = 10;
@@ -295,34 +296,70 @@ async function loadConfig() {
   if (!config.defaultProductId) config.defaultProductId = "haomai";
   if (!config.defaultProductName) config.defaultProductName = "好麦 AI";
   if (config.pruneMissing == null) config.pruneMissing = true;
+  if (!config.columns) config.columns = {};
+  if (!config.columns.category) config.columns.category = "风格分类";
+  if (!config.columns.styleId) config.columns.styleId = "风格ID";
+  if (!config.columns.styleLabel) config.columns.styleLabel = "风格名称";
+  if (!config.columns.order) config.columns.order = "排序";
+  if (!config.columns.image) config.columns.image = "图片";
+  if (!config.columns.title) config.columns.title = "标题";
+  if (!config.columns.enabled) config.columns.enabled = "启用";
+  if (!config.columns.productId) config.columns.productId = "产品ID";
+  if (!config.columns.productName) config.columns.productName = "产品名称";
+  if (!Array.isArray(config.sheets) || config.sheets.length === 0) {
+    if (!config.sheetId) throw new Error("Config needs sheetId or sheets[].");
+    config.sheets = [
+      {
+        sheetId: config.sheetId,
+        range: config.range || "A1:G200",
+        defaultProductId: config.defaultProductId,
+        defaultProductName: config.defaultProductName,
+      },
+    ];
+  }
+  config.sheets = config.sheets.map((sheet) => ({
+    range: "A1:H300",
+    headerRow: config.headerRow,
+    defaultProductId: config.defaultProductId,
+    defaultProductName: config.defaultProductName,
+    ...sheet,
+  }));
   return config;
 }
 
-async function readSheet(config) {
-  const output = await run(
-    "lark-cli",
-    [
-      "sheets",
-      "+read",
-      "--as",
-      config.identity,
-      "--spreadsheet-token",
-      config.spreadsheetToken,
-      "--sheet-id",
-      config.sheetId,
-      "--range",
-      config.range,
-    ],
-    { cwd: root },
-  );
-  const data = JSON.parse(output);
-  return data.values || data.data?.valueRange?.values || data.data?.values || [];
+async function readSheets(config) {
+  const results = [];
+
+  for (const sheet of config.sheets) {
+    const output = await run(
+      "lark-cli",
+      [
+        "sheets",
+        "+read",
+        "--as",
+        config.identity,
+        "--spreadsheet-token",
+        config.spreadsheetToken,
+        "--sheet-id",
+        sheet.sheetId,
+        "--range",
+        sheet.range,
+      ],
+      { cwd: root },
+    );
+    const data = JSON.parse(output);
+    const rows = data.values || data.data?.valueRange?.values || data.data?.values || [];
+    results.push({ rows, sheet });
+  }
+
+  return results;
 }
 
-function parseRows(rows, config) {
-  const headerIndex = Math.max(0, Number(config.headerRow || 1) - 1);
+function parseRows(rows, config, sheet = {}) {
+  const headerIndex = Math.max(0, Number(sheet.headerRow || config.headerRow || 1) - 1);
   const headers = (rows[headerIndex] || []).map((cell) => normalizeCellText(cell));
   const columns = {
+    category: findColumn(headers, config.columns.category),
     styleId: findColumn(headers, config.columns.styleId),
     styleLabel: findColumn(headers, config.columns.styleLabel),
     productId: findColumn(headers, config.columns.productId),
@@ -346,14 +383,16 @@ function parseRows(rows, config) {
 
     return extractFileRefs(row[columns.image]).map((fileRef, refIndex) => ({
       rowNumber,
-      productId: readCell(row, columns.productId) || config.defaultProductId,
-      productName: readCell(row, columns.productName) || config.defaultProductName,
+      sheetId: sheet.sheetId,
+      category: readCell(row, columns.category),
+      productId: readCell(row, columns.productId) || sheet.defaultProductId || config.defaultProductId,
+      productName: readCell(row, columns.productName) || sheet.defaultProductName || config.defaultProductName,
       styleId,
       styleLabel,
       order: Number(readCell(row, columns.order) || rowNumber),
       title: readCell(row, columns.title) || fileRef.name,
       token: fileRef.token,
-      sourceId: fileRef.token || fileRef.url,
+      sourceId: `${sheet.sheetId || "sheet"}:${fileRef.token || fileRef.url}`,
       fileName: fileRef.name || `row-${rowNumber}-${refIndex + 1}.png`,
     }));
   });
@@ -415,7 +454,7 @@ function buildFileName(entry) {
   const ext = [".png", ".jpg", ".jpeg", ".webp", ".gif"].includes(extname(entry.fileName).toLowerCase())
     ? extname(entry.fileName).toLowerCase()
     : ".png";
-  const hash = createHash("sha1").update(entry.token).digest("hex").slice(0, 8);
+  const hash = createHash("sha1").update(entry.sourceId || entry.token).digest("hex").slice(0, 8);
   return `${String(entry.order).padStart(2, "0")}-${slugify(entry.title || entry.fileName)}-${hash}${ext}`;
 }
 

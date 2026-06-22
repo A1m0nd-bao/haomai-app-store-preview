@@ -1,7 +1,19 @@
 {
   "spreadsheetToken": "YOUR_SPREADSHEET_TOKEN",
-  "sheetId": "YOUR_SHEET_ID",
-  "range": "A1:I300",
+  "sheets": [
+    {
+      "sheetId": "HAOMAI_SHEET_ID",
+      "range": "A1:H300",
+      "defaultProductId": "haomai",
+      "defaultProductName": "好麦 AI"
+    },
+    {
+      "sheetId": "TOPIA_SHEET_ID",
+      "range": "A1:H120",
+      "defaultProductId": "topia",
+      "defaultProductName": "Topia"
+    }
+  ],
   "headerRow": 1,
   "identity": "user",
   "pollSeconds": 10,
@@ -12,14 +24,13 @@
   "githubRepo": "A1m0nd-bao/haomai-app-store-preview",
   "pruneMissing": true,
   "columns": {
+    "category": "风格分类",
     "styleId": "风格ID",
     "styleLabel": "风格名称",
     "order": "排序",
     "image": "图片",
     "title": "标题",
     "enabled": "启用",
-    "notes": "备注",
-    "productId": "产品ID",
-    "productName": "产品名称"
+    "notes": "备注"
   }
 }
