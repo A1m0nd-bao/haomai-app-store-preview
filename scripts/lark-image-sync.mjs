@@ -1,4 +1,4 @@
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { basename, dirname, extname, join } from "node:path";
 import { spawn } from "node:child_process";
@@ -129,31 +129,115 @@ async function writeDataFile(file, state) {
 }
 
 async function publishChanges(config) {
-  await run("git", ["add", config.outputDir, config.dataFile], { cwd: root });
-  const status = await run("git", ["status", "--short", config.outputDir, config.dataFile], { cwd: root });
-  if (!status.trim()) {
-    console.log("[lark-image-sync] Nothing to publish.");
-    await pushPendingCommits();
-    return;
-  }
-
   const stamp = new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
-  await run("git", ["commit", "-m", `Sync App Store preview images ${stamp}`], { cwd: root });
-  await run("git", ["push"], { cwd: root });
+  const files = await listPublishFiles(config);
+  await publishFilesToGitHub({
+    repo: config.githubRepo,
+    files,
+    deleteDirs: [config.outputDir],
+    message: `Sync App Store preview images ${stamp}`,
+  });
   console.log("[lark-image-sync] Published changes to GitHub Pages.");
 }
 
 async function pushPendingCommits() {
-  let pending = "0";
+  return;
+}
+
+async function listPublishFiles(config) {
+  const files = [config.dataFile];
   try {
-    pending = await run("git", ["rev-list", "--count", "@{u}..HEAD"], { cwd: root });
+    files.push(...(await walkFiles(config.outputDir)));
   } catch {
+    // No synced images yet.
+  }
+  return [...new Set(files)].sort();
+}
+
+async function walkFiles(dir) {
+  const base = join(root, dir);
+  const entries = await readdir(base, { withFileTypes: true });
+  const files = [];
+
+  for (const entry of entries) {
+    const path = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...(await walkFiles(path)));
+    } else if (entry.isFile()) {
+      files.push(path);
+    }
+  }
+
+  return files;
+}
+
+async function publishFilesToGitHub({ repo, files, deleteDirs, message }) {
+  if (!repo) throw new Error("Config needs githubRepo to publish through GitHub API.");
+
+  const ref = await ghApi(`repos/${repo}/git/ref/heads/main`);
+  const headSha = ref.object.sha;
+  const headCommit = await ghApi(`repos/${repo}/git/commits/${headSha}`);
+  const remoteTree = await ghApi(`repos/${repo}/git/trees/${headCommit.tree.sha}?recursive=1`);
+  const localPaths = new Set(files);
+  const tree = [];
+
+  for (const file of files) {
+    const bytes = await readFile(join(root, file));
+    const blob = await ghApi(`repos/${repo}/git/blobs`, "POST", {
+      content: bytes.toString("base64"),
+      encoding: "base64",
+    });
+    tree.push({
+      path: file,
+      mode: "100644",
+      type: "blob",
+      sha: blob.sha,
+    });
+  }
+
+  for (const item of remoteTree.tree || []) {
+    if (item.type !== "blob") continue;
+    if (!deleteDirs.some((dir) => item.path.startsWith(`${dir}/`))) continue;
+    if (localPaths.has(item.path)) continue;
+    tree.push({
+      path: item.path,
+      mode: "100644",
+      type: "blob",
+      sha: null,
+    });
+  }
+
+  const nextTree = await ghApi(`repos/${repo}/git/trees`, "POST", {
+    base_tree: headCommit.tree.sha,
+    tree,
+  });
+
+  if (nextTree.sha === headCommit.tree.sha) {
+    console.log("[lark-image-sync] Nothing to publish.");
     return;
   }
 
-  if (Number(pending.trim()) <= 0) return;
-  await run("git", ["push"], { cwd: root });
-  console.log("[lark-image-sync] Published pending commits to GitHub Pages.");
+  const nextCommit = await ghApi(`repos/${repo}/git/commits`, "POST", {
+    message,
+    tree: nextTree.sha,
+    parents: [headSha],
+  });
+
+  await ghApi(`repos/${repo}/git/refs/heads/main`, "PATCH", {
+    sha: nextCommit.sha,
+    force: false,
+  });
+}
+
+async function ghApi(path, method = "GET", payload = null) {
+  const args = ["api", path];
+  if (method !== "GET") args.push("--method", method);
+  if (payload) args.push("--input", "-");
+  const output = await run("gh", args, {
+    cwd: root,
+    input: payload ? JSON.stringify(payload) : undefined,
+  });
+  return JSON.parse(output);
 }
 
 async function loadConfig() {
@@ -174,6 +258,7 @@ async function loadConfig() {
   if (!config.outputDir) config.outputDir = "images/lark";
   if (!config.dataFile) config.dataFile = "data/screenshots.json";
   if (!config.stateFile) config.stateFile = ".sync/lark-image-state.json";
+  if (!config.githubRepo) config.githubRepo = "A1m0nd-bao/haomai-app-store-preview";
   if (config.pruneMissing == null) config.pruneMissing = true;
   return config;
 }
@@ -352,7 +437,7 @@ function run(command, args, options = {}) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, {
       cwd: options.cwd || root,
-      stdio: ["ignore", "pipe", "pipe"],
+      stdio: [options.input ? "pipe" : "ignore", "pipe", "pipe"],
     });
     let stdout = "";
     let stderr = "";
@@ -362,6 +447,9 @@ function run(command, args, options = {}) {
     child.stderr.on("data", (chunk) => {
       stderr += chunk.toString();
     });
+    if (options.input) {
+      child.stdin?.end(options.input);
+    }
     child.on("close", (code) => {
       if (code === 0) {
         resolve(stdout);

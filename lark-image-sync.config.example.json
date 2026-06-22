@@ -8,6 +8,7 @@
   "outputDir": "images/lark",
   "dataFile": "data/screenshots.json",
   "stateFile": ".sync/lark-image-state.json",
+  "githubRepo": "A1m0nd-bao/haomai-app-store-preview",
   "pruneMissing": true,
   "columns": {
     "styleId": "风格ID",
