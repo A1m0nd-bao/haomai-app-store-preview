@@ -1,0 +1,21 @@
+{
+  "spreadsheetToken": "YOUR_SPREADSHEET_TOKEN",
+  "sheetId": "YOUR_SHEET_ID",
+  "range": "A1:G200",
+  "headerRow": 1,
+  "identity": "user",
+  "pollSeconds": 10,
+  "outputDir": "images/lark",
+  "dataFile": "data/screenshots.json",
+  "stateFile": ".sync/lark-image-state.json",
+  "pruneMissing": true,
+  "columns": {
+    "styleId": "风格ID",
+    "styleLabel": "风格名称",
+    "order": "排序",
+    "image": "图片",
+    "title": "标题",
+    "enabled": "启用",
+    "notes": "备注"
+  }
+}

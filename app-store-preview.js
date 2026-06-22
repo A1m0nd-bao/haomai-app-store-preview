@@ -30,7 +30,7 @@ const bubbleScreenshotOrder = [
   "15-用户指引3.png",
 ];
 
-const styles = [
+const fallbackStyles = [
   {
     id: "bubble-glass",
     label: "气泡增强｜深色玻璃",
@@ -84,6 +84,7 @@ const styles = [
 ];
 
 const assetVersion = "overflow-bubble-20260506-9";
+const dataVersion = "sheet-data-20260622";
 
 const rail = document.querySelector("#screenshotRail");
 const tabs = document.querySelector("#styleTabs");
@@ -92,32 +93,43 @@ const lightboxImage = lightbox.querySelector("img");
 const lightboxCaption = lightbox.querySelector("p");
 const closeButton = lightbox.querySelector(".close");
 
+let styles = fallbackStyles;
 let currentStyle = styles[0];
 
 function labelFromName(name) {
   return name.replace(/^\d+-/, "").replace(/\.png$/, "").replaceAll("-", " / ");
 }
 
-function imagePath(style, name) {
-  return `${style.base}/${name}?v=${assetVersion}`;
+function labelFromScreenshot(item) {
+  if (typeof item === "string") return labelFromName(item);
+  return item.title || labelFromName(item.src.split("/").pop() || "");
+}
+
+function imagePath(style, item) {
+  if (typeof item === "object" && item.src) {
+    return `${item.src}?v=${item.version || dataVersion}`;
+  }
+
+  return `${style.base}/${item}?v=${assetVersion}`;
 }
 
 function orderForStyle(style) {
+  if (Array.isArray(style.screenshots)) return style.screenshots;
   return style.id.startsWith("bubble-") ? bubbleScreenshotOrder : screenshotOrder;
 }
 
-function createCard(style, name) {
-  const label = labelFromName(name);
+function createCard(style, item) {
+  const label = labelFromScreenshot(item);
   const figure = document.createElement("figure");
   figure.className = "shot-card";
 
   const button = document.createElement("button");
   button.type = "button";
   button.setAttribute("aria-label", `放大预览 ${style.label} - ${label}`);
-  button.addEventListener("click", () => openLightbox(style, name, label));
+  button.addEventListener("click", () => openLightbox(style, item, label));
 
   const img = document.createElement("img");
-  img.src = imagePath(style, name);
+  img.src = imagePath(style, item);
   img.alt = `${style.label} - ${label}`;
   img.loading = "lazy";
 
@@ -151,14 +163,14 @@ function renderTabs() {
 
 function renderRail() {
   rail.replaceChildren();
-  orderForStyle(currentStyle).forEach((name) => {
-    rail.appendChild(createCard(currentStyle, name));
+  orderForStyle(currentStyle).forEach((item) => {
+    rail.appendChild(createCard(currentStyle, item));
   });
   rail.scrollLeft = 0;
 }
 
-function openLightbox(style, name, label) {
-  lightboxImage.src = imagePath(style, name);
+function openLightbox(style, item, label) {
+  lightboxImage.src = imagePath(style, item);
   lightboxImage.alt = `${style.label} - ${label}`;
   lightboxCaption.textContent = `${style.label} - ${label}`;
   lightbox.classList.add("open");
@@ -171,8 +183,33 @@ function closeLightbox() {
   lightboxImage.removeAttribute("src");
 }
 
-renderTabs();
-renderRail();
+async function loadScreenshotData() {
+  try {
+    const response = await fetch(`./data/screenshots.json?v=${Date.now()}`);
+    if (!response.ok) throw new Error("No screenshot data");
+    const data = await response.json();
+    if (!Array.isArray(data.styles) || data.styles.length === 0) return;
+    styles = data.styles
+      .map((style) => ({
+        id: style.id,
+        label: style.label,
+        screenshots: Array.isArray(style.screenshots)
+          ? style.screenshots
+              .filter((item) => item?.src)
+              .sort((a, b) => Number(a.order || 0) - Number(b.order || 0))
+          : [],
+      }))
+      .filter((style) => style.id && style.label && style.screenshots.length > 0);
+  } catch {
+    styles = fallbackStyles;
+  }
+}
+
+loadScreenshotData().finally(() => {
+  currentStyle = styles[0] || fallbackStyles[0];
+  renderTabs();
+  renderRail();
+});
 
 closeButton.addEventListener("click", closeLightbox);
 lightbox.addEventListener("click", (event) => {

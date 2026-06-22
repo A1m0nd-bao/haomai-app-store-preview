@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "start": "python3 -m http.server 4174",
+    "sync:images": "node ./scripts/lark-image-sync.mjs",
+    "sync:images:publish": "node ./scripts/lark-image-sync.mjs --publish",
+    "sync:images:watch": "node ./scripts/lark-image-sync.mjs --watch",
+    "sync:images:watch:publish": "node ./scripts/lark-image-sync.mjs --watch --publish"
+  }
+}
