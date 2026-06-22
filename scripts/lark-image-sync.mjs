@@ -75,7 +75,7 @@ async function syncOnce(config, options = {}) {
 
   if (changed) {
     await saveState(config.stateFile, state);
-    await writeDataFile(config.dataFile, state);
+    await writeDataFile(config, state);
     if (options.publish) await publishChanges(config);
   } else {
     console.log("[lark-image-sync] No image changes.");
@@ -95,8 +95,18 @@ function hasStateChanged(current, next) {
   );
 }
 
-async function writeDataFile(file, state) {
+async function writeDataFile(config, state) {
   const groups = new Map();
+  const baseData = await loadBaseData(config.baseDataFile);
+
+  for (const style of baseData.styles || []) {
+    if (!style.id || !style.label || !Array.isArray(style.screenshots)) continue;
+    groups.set(style.id, {
+      id: style.id,
+      label: style.label,
+      screenshots: style.screenshots.map((item) => ({ ...item })),
+    });
+  }
 
   for (const item of Object.values(state.synced)) {
     if (!item.output || !item.styleId || !item.styleLabel) continue;
@@ -108,12 +118,16 @@ async function writeDataFile(file, state) {
       });
     }
 
-    groups.get(item.styleId).screenshots.push({
+    const screenshots = groups.get(item.styleId).screenshots;
+    const nextScreenshot = {
       title: item.title || item.fileName || basename(item.output),
       src: item.output,
       order: Number(item.order || 0),
       version: item.updatedAt || Date.now(),
-    });
+    };
+    const existingIndex = screenshots.findIndex((screenshot) => Number(screenshot.order || 0) === Number(item.order || 0));
+    if (existingIndex >= 0) screenshots[existingIndex] = nextScreenshot;
+    else screenshots.push(nextScreenshot);
   }
 
   const data = {
@@ -124,8 +138,18 @@ async function writeDataFile(file, state) {
     })),
   };
 
-  await mkdir(dirname(join(root, file)), { recursive: true });
-  await writeFile(join(root, file), `${JSON.stringify(data, null, 2)}\n`);
+  await mkdir(dirname(join(root, config.dataFile)), { recursive: true });
+  await writeFile(join(root, config.dataFile), `${JSON.stringify(data, null, 2)}\n`);
+}
+
+async function loadBaseData(file) {
+  if (!file) return { styles: [] };
+  try {
+    const raw = await readFile(join(root, file), "utf8");
+    return JSON.parse(raw);
+  } catch {
+    return { styles: [] };
+  }
 }
 
 async function publishChanges(config) {
@@ -145,7 +169,7 @@ async function pushPendingCommits() {
 }
 
 async function listPublishFiles(config) {
-  const files = [config.dataFile];
+  const files = [config.baseDataFile, config.dataFile].filter(Boolean);
   try {
     files.push(...(await walkFiles(config.outputDir)));
   } catch {
@@ -256,6 +280,7 @@ async function loadConfig() {
   if (!config.identity) config.identity = "user";
   if (!config.pollSeconds) config.pollSeconds = 10;
   if (!config.outputDir) config.outputDir = "images/lark";
+  if (!config.baseDataFile) config.baseDataFile = "data/default-screenshots.json";
   if (!config.dataFile) config.dataFile = "data/screenshots.json";
   if (!config.stateFile) config.stateFile = ".sync/lark-image-state.json";
   if (!config.githubRepo) config.githubRepo = "A1m0nd-bao/haomai-app-store-preview";

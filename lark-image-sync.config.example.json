@@ -6,6 +6,7 @@
   "identity": "user",
   "pollSeconds": 10,
   "outputDir": "images/lark",
+  "baseDataFile": "data/default-screenshots.json",
   "dataFile": "data/screenshots.json",
   "stateFile": ".sync/lark-image-state.json",
   "githubRepo": "A1m0nd-bao/haomai-app-store-preview",
