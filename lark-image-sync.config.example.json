@@ -16,7 +16,7 @@
   ],
   "headerRow": 1,
   "identity": "user",
-  "pollSeconds": 10,
+  "pollSeconds": 5,
   "outputDir": "images/lark",
   "baseDataFile": "data/default-screenshots.json",
   "dataFile": "data/screenshots.json",
