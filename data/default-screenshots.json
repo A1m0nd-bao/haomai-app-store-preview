@@ -2,6 +2,7 @@
   "version": "seed-20260622",
   "styles": [
     {
+      "productId": "haomai",
       "id": "bubble-glass",
       "label": "气泡增强｜深色玻璃",
       "screenshots": [
@@ -88,6 +89,7 @@
       ]
     },
     {
+      "productId": "haomai",
       "id": "bubble-white-card",
       "label": "气泡增强｜白色卡片",
       "screenshots": [
@@ -174,6 +176,7 @@
       ]
     },
     {
+      "productId": "haomai",
       "id": "bubble-black-title",
       "label": "气泡增强｜黑底标题",
       "screenshots": [
@@ -260,6 +263,7 @@
       ]
     },
     {
+      "productId": "haomai",
       "id": "bubble-blue-white",
       "label": "气泡增强｜蓝白清透",
       "screenshots": [
@@ -346,6 +350,7 @@
       ]
     },
     {
+      "productId": "haomai",
       "id": "bubble-graphite",
       "label": "气泡增强｜石墨极简",
       "screenshots": [
@@ -432,6 +437,7 @@
       ]
     },
     {
+      "productId": "haomai",
       "id": "glass",
       "label": "深色玻璃光幕",
       "screenshots": [
@@ -488,6 +494,7 @@
       ]
     },
     {
+      "productId": "haomai",
       "id": "white-card",
       "label": "白色大卡片",
       "screenshots": [
@@ -544,6 +551,7 @@
       ]
     },
     {
+      "productId": "haomai",
       "id": "black-title",
       "label": "黑底大标题",
       "screenshots": [
@@ -600,6 +608,7 @@
       ]
     },
     {
+      "productId": "haomai",
       "id": "blue-white",
       "label": "蓝白清透",
       "screenshots": [
@@ -656,6 +665,7 @@
       ]
     },
     {
+      "productId": "haomai",
       "id": "graphite",
       "label": "石墨极简",
       "screenshots": [

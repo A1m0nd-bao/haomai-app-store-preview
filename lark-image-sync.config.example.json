@@ -1,7 +1,7 @@
 {
   "spreadsheetToken": "YOUR_SPREADSHEET_TOKEN",
   "sheetId": "YOUR_SHEET_ID",
-  "range": "A1:G200",
+  "range": "A1:I300",
   "headerRow": 1,
   "identity": "user",
   "pollSeconds": 10,
@@ -18,6 +18,8 @@
     "image": "图片",
     "title": "标题",
     "enabled": "启用",
-    "notes": "备注"
+    "notes": "备注",
+    "productId": "产品ID",
+    "productName": "产品名称"
   }
 }

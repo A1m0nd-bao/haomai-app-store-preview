@@ -48,6 +48,8 @@ async function syncOnce(config, options = {}) {
     const nextState = {
       output,
       token: entry.token,
+      productId: entry.productId,
+      productName: entry.productName,
       styleId: entry.styleId,
       styleLabel: entry.styleLabel,
       order: entry.order,
@@ -87,6 +89,8 @@ function hasStateChanged(current, next) {
   return (
     current.output !== next.output ||
     current.token !== next.token ||
+    current.productId !== next.productId ||
+    current.productName !== next.productName ||
     current.styleId !== next.styleId ||
     current.styleLabel !== next.styleLabel ||
     Number(current.order || 0) !== Number(next.order || 0) ||
@@ -101,7 +105,9 @@ async function writeDataFile(config, state) {
 
   for (const style of baseData.styles || []) {
     if (!style.id || !style.label || !Array.isArray(style.screenshots)) continue;
-    groups.set(style.id, {
+    const key = `${style.productId || "haomai"}:${style.id}`;
+    groups.set(key, {
+      productId: style.productId || "haomai",
       id: style.id,
       label: style.label,
       screenshots: style.screenshots.map((item) => ({ ...item })),
@@ -110,15 +116,17 @@ async function writeDataFile(config, state) {
 
   for (const item of Object.values(state.synced)) {
     if (!item.output || !item.styleId || !item.styleLabel) continue;
-    if (!groups.has(item.styleId)) {
-      groups.set(item.styleId, {
+    const key = `${item.productId || "haomai"}:${item.styleId}`;
+    if (!groups.has(key)) {
+      groups.set(key, {
+        productId: item.productId || "haomai",
         id: item.styleId,
         label: item.styleLabel,
         screenshots: [],
       });
     }
 
-    const screenshots = groups.get(item.styleId).screenshots;
+    const screenshots = groups.get(key).screenshots;
     const nextScreenshot = {
       title: item.title || item.fileName || basename(item.output),
       src: item.output,
@@ -284,6 +292,8 @@ async function loadConfig() {
   if (!config.dataFile) config.dataFile = "data/screenshots.json";
   if (!config.stateFile) config.stateFile = ".sync/lark-image-state.json";
   if (!config.githubRepo) config.githubRepo = "A1m0nd-bao/haomai-app-store-preview";
+  if (!config.defaultProductId) config.defaultProductId = "haomai";
+  if (!config.defaultProductName) config.defaultProductName = "好麦 AI";
   if (config.pruneMissing == null) config.pruneMissing = true;
   return config;
 }
@@ -315,6 +325,8 @@ function parseRows(rows, config) {
   const columns = {
     styleId: findColumn(headers, config.columns.styleId),
     styleLabel: findColumn(headers, config.columns.styleLabel),
+    productId: findColumn(headers, config.columns.productId),
+    productName: findColumn(headers, config.columns.productName),
     order: findColumn(headers, config.columns.order),
     image: findColumn(headers, config.columns.image),
     title: findColumn(headers, config.columns.title),
@@ -334,6 +346,8 @@ function parseRows(rows, config) {
 
     return extractFileRefs(row[columns.image]).map((fileRef, refIndex) => ({
       rowNumber,
+      productId: readCell(row, columns.productId) || config.defaultProductId,
+      productName: readCell(row, columns.productName) || config.defaultProductName,
       styleId,
       styleLabel,
       order: Number(readCell(row, columns.order) || rowNumber),

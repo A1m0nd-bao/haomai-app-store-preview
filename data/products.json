@@ -1,0 +1,46 @@
+{
+  "products": [
+    {
+      "id": "haomai",
+      "name": "好麦 AI",
+      "subtitle": "把繁琐的数字世界折叠成你的一句指令",
+      "developer": "好麦科技",
+      "icon": "./assets/haomai-logo-black.png",
+      "category": "效率",
+      "categoryDetail": "工具",
+      "rating": "4.9",
+      "age": "4+",
+      "compatibility": "iPhone",
+      "language": "简体中文",
+      "priceNote": "App 内购买",
+      "summary": "好麦 AI 是你的专属数字员工。无需复杂操作，只要输入任务指令，AI 即可规划执行路径，在手机中跨 App 自动执行重复性工作，并在结束后给出反馈与总结。",
+      "highlights": [
+        "精准找客、评论转化、口碑维护。",
+        "竞品监控、比价、信息整理与总结。",
+        "人脉激活、回访、线上触达与运营执行。"
+      ],
+      "tags": ["效率", "AI 自动执行", "运营工具"]
+    },
+    {
+      "id": "topia",
+      "name": "Topia",
+      "subtitle": "在现实地点留下你的 Loci、Moment 和足迹",
+      "developer": "好麦科技",
+      "iconText": "T",
+      "category": "社交",
+      "categoryDetail": "AR 轻社交",
+      "rating": "新 App",
+      "age": "4+",
+      "compatibility": "iPhone",
+      "language": "简体中文 / English",
+      "priceNote": "即将推出",
+      "summary": "Topia 是一款以 AR 为主的地点轻社交 App。用户通过自己的 Loci Character 在现实地点留下 Loci 内容，这些内容会沉淀为 AR Footprint，并通过评论、回应、NFC 名片和附近发现形成轻社交关系。",
+      "highlights": [
+        "AR-first：第一动力来自现实空间里的互动体验。",
+        "Place-based：内容不是信息流，而是被放置在真实地点。",
+        "Character identity：Loci 是用户在空间里的身份载体。"
+      ],
+      "tags": ["AR-first", "Place-based", "Light social"]
+    }
+  ]
+}
