@@ -1,5 +1,5 @@
 {
-  "version": "2026-06-26T12:48:22.790Z",
+  "version": "2026-06-26T12:54:48.338Z",
   "styles": [
     {
       "category": "气泡增强",
@@ -741,7 +741,7 @@
           "title": "AR 互动面",
           "src": "./assets/lark-screenshots/topia/camera-ar/01-ar-505cb1b2.png",
           "order": 1,
-          "version": "2026-06-26T04:08:28.997Z"
+          "version": "2026-06-26T12:54:46.023Z"
         }
       ]
     },
@@ -755,7 +755,7 @@
           "title": "当前 Loci 形象",
           "src": "./assets/lark-screenshots/topia/character/02-loci-2a4f0a2c.png",
           "order": 2,
-          "version": "2026-06-26T04:08:29.830Z"
+          "version": "2026-06-26T12:54:46.744Z"
         }
       ]
     },
@@ -769,7 +769,7 @@
           "title": "个人资料页",
           "src": "./assets/lark-screenshots/topia/profile/03-screenshot-af68f3bb.png",
           "order": 3,
-          "version": "2026-06-26T04:08:30.676Z"
+          "version": "2026-06-26T12:54:47.562Z"
         }
       ]
     },
@@ -783,7 +783,7 @@
           "title": "我的 AR 足迹",
           "src": "./assets/lark-screenshots/topia/footprint/04-ar-93156940.png",
           "order": 4,
-          "version": "2026-06-26T12:48:22.789Z"
+          "version": "2026-06-26T12:54:48.336Z"
         }
       ]
     },
