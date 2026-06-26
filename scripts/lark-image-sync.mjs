@@ -36,12 +36,16 @@ async function syncOnce(config, options = {}) {
 
   for (const entry of entries) {
     const existing = state.synced[entry.sourceId];
+    const fileName = buildFileName(entry);
+    const outputPath = join(root, config.outputDir, slugify(entry.productId), slugify(entry.styleId), fileName);
+    const desiredOutput = relativePath(outputPath);
     let output = existing?.output;
 
-    if (!existing) {
-      const fileName = buildFileName(entry);
-      const outputPath = join(root, config.outputDir, slugify(entry.productId), slugify(entry.styleId), fileName);
+    if (!existing || output !== desiredOutput) {
       await downloadImage(entry.token, outputPath, config.identity);
+      if (existing?.output && existing.output !== desiredOutput) {
+        await removeSyncedFile(existing.output, config.outputDir);
+      }
       output = relativePath(outputPath);
       console.log(`[lark-image-sync] Synced ${output}`);
     }
@@ -222,7 +226,7 @@ async function publishChanges(config) {
   await publishFilesToGitHub({
     repo: config.githubRepo,
     files,
-    deleteDirs: [config.outputDir],
+    deleteDirs: [config.outputDir, ...(config.previousOutputDirs || [])],
     message: `Sync App Store preview images ${stamp}`,
   });
   console.log("[lark-image-sync] Published changes to GitHub Pages.");
@@ -568,7 +572,7 @@ function buildFileName(entry) {
     ? extname(entry.fileName).toLowerCase()
     : ".png";
   const hash = createHash("sha1").update(entry.sourceId || entry.token).digest("hex").slice(0, 8);
-  return `${String(entry.order).padStart(2, "0")}-${slugify(entry.title || entry.fileName)}-${hash}${ext}`;
+  return `${String(entry.order).padStart(2, "0")}-${asciiSlugify(entry.title || entry.fileName)}-${hash}${ext}`;
 }
 
 async function downloadImage(token, outputPath, identity) {
@@ -623,6 +627,17 @@ function slugify(value) {
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "")
     .slice(0, 80) || "untitled";
+}
+
+function asciiSlugify(value) {
+  return String(value || "screenshot")
+    .normalize("NFKD")
+    .replace(/[^\x00-\x7F]+/g, "-")
+    .replace(/[^a-zA-Z0-9]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 60)
+    .toLowerCase() || "screenshot";
 }
 
 function run(command, args, options = {}) {

@@ -1,4 +1,5 @@
 const assetVersion = "multi-product-20260622";
+const rawAssetBase = "https://raw.githubusercontent.com/A1m0nd-bao/haomai-app-store-preview/main";
 
 const main = document.querySelector("main");
 const nav = document.querySelector("nav");
@@ -25,7 +26,7 @@ async function loadJson(path, fallback) {
 async function boot() {
   const [productData, screenshotData] = await Promise.all([
     loadJson("./data/products.json", { products: [] }),
-    loadJson("./data/screenshots.json", { styles: [] }),
+    loadJson(`${rawAssetBase}/data/screenshots.json`, { styles: [] }),
   ]);
 
   products = Array.isArray(productData.products) ? productData.products : [];
@@ -328,7 +329,12 @@ function labelFromScreenshot(item) {
 }
 
 function imagePath(item) {
-  return `${item.src}?v=${item.version || assetVersion}`;
+  const src = item.src || "";
+  const version = item.version || assetVersion;
+  if (src.startsWith("./assets/lark-screenshots/")) {
+    return `${rawAssetBase}/${src.replace(/^\.\//, "")}?v=${version}`;
+  }
+  return `${src}?v=${version}`;
 }
 
 function createCard(style, item) {
