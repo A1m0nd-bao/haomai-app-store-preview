@@ -41,7 +41,7 @@ async function syncOnce(config, options = {}) {
     const desiredOutput = relativePath(outputPath);
     let output = existing?.output;
 
-    if (!existing || output !== desiredOutput) {
+    if (!existing || existing.token !== entry.token || output !== desiredOutput) {
       await downloadImage(entry.token, outputPath, config.identity);
       if (existing?.output && existing.output !== desiredOutput) {
         await removeSyncedFile(existing.output, config.outputDir);
