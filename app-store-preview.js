@@ -113,7 +113,7 @@ function createProductCard(product) {
   link.className = "product-card";
   link.href = `?product=${encodeURIComponent(product.id)}`;
 
-  const screenshotCount = stylesForProduct(product.id).reduce((count, style) => count + style.screenshots.length, 0);
+  const screenshotCount = stylesForProduct(product).reduce((count, style) => count + style.screenshots.length, 0);
   link.innerHTML = `
     ${appIconMarkup(product, "product-card-icon")}
     <div class="product-card-meta">
@@ -162,7 +162,7 @@ function renderProductPage(productId) {
 
   setNav("product");
   document.title = `${currentProduct.name} - App Store 预览`;
-  const productStyles = stylesForProduct(currentProduct.id);
+  const productStyles = stylesForProduct(currentProduct);
   currentStyle = productStyles[0] || null;
 
   main.replaceChildren(
@@ -308,8 +308,12 @@ function createAppInfo(product) {
   return section;
 }
 
-function stylesForProduct(productId) {
-  return screenshotStyles
+function stylesForProduct(productOrId) {
+  const product = typeof productOrId === "string"
+    ? products.find((item) => item.id === productOrId) || { id: productOrId }
+    : productOrId;
+  const productId = product?.id;
+  const styles = screenshotStyles
     .filter((style) => (style.productId || "haomai") === productId)
     .map((style) => ({
       id: style.id,
@@ -322,6 +326,29 @@ function stylesForProduct(productId) {
         : [],
     }))
     .filter((style) => style.id && style.label && style.screenshots.length > 0);
+
+  if (product?.previewMode !== "combined") return styles;
+
+  const screenshots = styles
+    .flatMap((style) =>
+      style.screenshots.map((item) => ({
+        ...item,
+        title: item.title || style.label,
+        sourceStyleLabel: style.label,
+      })),
+    )
+    .sort((a, b) => Number(a.order || 0) - Number(b.order || 0));
+
+  if (screenshots.length === 0) return [];
+
+  return [
+    {
+      id: `${productId}-combined`,
+      label: `${product?.name || "产品"} 预览`,
+      category: "App Store 截图",
+      screenshots,
+    },
+  ];
 }
 
 function labelFromScreenshot(item) {
