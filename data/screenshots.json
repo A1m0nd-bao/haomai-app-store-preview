@@ -1,5 +1,5 @@
 {
-  "version": "2026-06-22T07:28:45.948Z",
+  "version": "2026-06-26T04:01:08.098Z",
   "styles": [
     {
       "category": "气泡增强",
@@ -736,28 +736,56 @@
       "productId": "topia",
       "id": "camera-ar",
       "label": "AR 互动面",
-      "screenshots": []
+      "screenshots": [
+        {
+          "title": "AR 互动面",
+          "src": "./images/lark/topia/camera-ar/01-AR-互动面-505cb1b2.png",
+          "order": 1,
+          "version": "2026-06-26T04:01:05.344Z"
+        }
+      ]
     },
     {
       "category": "身份与角色",
       "productId": "topia",
       "id": "character",
       "label": "Loci Character",
-      "screenshots": []
+      "screenshots": [
+        {
+          "title": "当前 Loci 形象",
+          "src": "./images/lark/topia/character/02-当前-Loci-形象-2a4f0a2c.png",
+          "order": 2,
+          "version": "2026-06-26T04:01:06.546Z"
+        }
+      ]
     },
     {
       "category": "身份与角色",
       "productId": "topia",
       "id": "profile",
       "label": "Profile",
-      "screenshots": []
+      "screenshots": [
+        {
+          "title": "个人资料页",
+          "src": "./images/lark/topia/profile/03-个人资料页-af68f3bb.png",
+          "order": 3,
+          "version": "2026-06-26T04:01:07.321Z"
+        }
+      ]
     },
     {
       "category": "地点与足迹",
       "productId": "topia",
       "id": "footprint",
       "label": "AR Footprint",
-      "screenshots": []
+      "screenshots": [
+        {
+          "title": "我的 AR 足迹",
+          "src": "./images/lark/topia/footprint/04-我的-AR-足迹-3fbe31b3.png",
+          "order": 4,
+          "version": "2026-06-26T04:01:08.095Z"
+        }
+      ]
     },
     {
       "category": "地点与足迹",
