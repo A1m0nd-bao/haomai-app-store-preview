@@ -573,6 +573,7 @@ function buildFileName(entry) {
 
 async function downloadImage(token, outputPath, identity) {
   await mkdir(dirname(outputPath), { recursive: true });
+  const output = outputPath.startsWith(`${root}/`) ? outputPath.replace(`${root}/`, "") : outputPath;
   await run(
     "lark-cli",
     [
@@ -582,7 +583,7 @@ async function downloadImage(token, outputPath, identity) {
       "GET",
       `/open-apis/drive/v1/medias/${token}/download`,
       "--output",
-      outputPath,
+      output,
     ],
     { cwd: root },
   );
