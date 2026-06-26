@@ -1,5 +1,5 @@
 {
-  "version": "2026-06-26T04:01:08.098Z",
+  "version": "2026-06-26T04:05:54.709Z",
   "styles": [
     {
       "category": "气泡增强",
@@ -739,9 +739,9 @@
       "screenshots": [
         {
           "title": "AR 互动面",
-          "src": "./images/lark/topia/camera-ar/01-AR-互动面-505cb1b2.png",
+          "src": "./images/lark/topia/camera-ar/01-ar-505cb1b2.png",
           "order": 1,
-          "version": "2026-06-26T04:01:05.344Z"
+          "version": "2026-06-26T04:05:52.018Z"
         }
       ]
     },
@@ -753,9 +753,9 @@
       "screenshots": [
         {
           "title": "当前 Loci 形象",
-          "src": "./images/lark/topia/character/02-当前-Loci-形象-2a4f0a2c.png",
+          "src": "./images/lark/topia/character/02-loci-2a4f0a2c.png",
           "order": 2,
-          "version": "2026-06-26T04:01:06.546Z"
+          "version": "2026-06-26T04:05:53.267Z"
         }
       ]
     },
@@ -767,9 +767,9 @@
       "screenshots": [
         {
           "title": "个人资料页",
-          "src": "./images/lark/topia/profile/03-个人资料页-af68f3bb.png",
+          "src": "./images/lark/topia/profile/03-screenshot-af68f3bb.png",
           "order": 3,
-          "version": "2026-06-26T04:01:07.321Z"
+          "version": "2026-06-26T04:05:53.987Z"
         }
       ]
     },
@@ -781,9 +781,9 @@
       "screenshots": [
         {
           "title": "我的 AR 足迹",
-          "src": "./images/lark/topia/footprint/04-我的-AR-足迹-3fbe31b3.png",
+          "src": "./images/lark/topia/footprint/04-ar-3fbe31b3.png",
           "order": 4,
-          "version": "2026-06-26T04:01:08.095Z"
+          "version": "2026-06-26T04:05:54.706Z"
         }
       ]
     },
