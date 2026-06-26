@@ -26,7 +26,7 @@
       "name": "Topia",
       "subtitle": "在现实地点留下你的 Loci、Moment 和足迹",
       "developer": "Core-Mate",
-      "iconText": "T",
+      "icon": "./assets/topia-logo.png",
       "category": "社交",
       "categoryDetail": "AR 轻社交",
       "rating": "新 App",
